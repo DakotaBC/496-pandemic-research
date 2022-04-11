@@ -147,7 +147,8 @@ def main():
                                 pop = pop + edge.weight
                     pop = int(pop) - int(screenData(deaths))
                     if (j == 14 or i == 304):
-                        doc.writerow([str(node), str(week), str(pop), str(deaths), str(confirmed), str(recovered), str(active), str(hospitalized), str(hospitalization_rate / j)])
+                        """Data can produce NA, consult if the data should be structured in the form of NA = 0"""
+                        doc.writerow([str(node), str(week), str(pop), str(deaths), str(confirmed), str(recovered), str(active), str(hospitalized), str(float(screenData(hospitalization_rate)) / j)])
                         j = -1
                         deaths = 0
                         confirmed = 0
