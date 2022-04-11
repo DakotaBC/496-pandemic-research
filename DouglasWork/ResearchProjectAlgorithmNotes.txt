@@ -1,0 +1,43 @@
+https://towardsdatascience.com/feature-handling-3f14c12ecbb8
+
+The first article I found goes over some of the basic hurdles of algorithmic analysis of categorical features.
+It gives multiple options for how categorical data can be processed effectively in an algorithm and presents the
+benefits and drawbacks of each approach. While much of this won't be directly applicable unless I intend to implement
+one of these models myself for the sake of using a solely numerical model (I won't), but it's still highly informative
+and relevant to my current topic of research.
+
+https://towardsdatascience.com/clustering-algorithm-for-data-with-mixed-categorical-and-numerical-features-d4e3a48066a0
+
+The next article I found describes a numerical clustering algorithm that has been modified to include categorical parameters
+in its analysis. The biggest issue I'm currently finding with this algorithm is that it is a clustering algorithm and it is
+intended for unsupervised machine learning. While I am open to the idea of utilizing unsupervised machine learning in this
+project, it seems to me that a supervised model that learns based on our data we already have would be better suited to the 
+task of hospitalization prediction. Perhaps it could be useful to grab a larger dataset, such as a subsection of the Google
+dataset or Johns Hopkins dataset, to put through an unsupervised algorithm in an attempt to extract potentially useful 
+correlations. This approach, however, risks being unnecessary, because to my knowledge, this is actually one of the primary
+functions of our usage of graphing; if we have decided that determination of useful features can be performed through graph
+mining, then it may not be a good idea to invest large amounts of time into an alternative method that may or may not pay off.
+
+I next looked into Support Vector Machine as an algorithm. Though it's capable of handling both numerical and categorical data,
+it seems to me that the primary utility of this algorithm is in its classification capabilities, which isn't exactly what we want
+in this case.
+
+I'm beginning to notice a pattern with the algorithms that I'm researching. Many of the algorithms claimed to support both 
+categorical and numerical data don't tend to take both simultaneously. It seems to instead be almost like a switch that can
+be flipped on the algorithm to determine what it does, but it cannot do both simultaneously. Effectively, at least. I'm beginning 
+to think that perhaps encoding our categorical data in some manner like the first article mentions may be a good idea, the trick
+then would be to find both a method of encoding and an appropriate algorithm that won't try to extrapolate misleading characteristics
+from the method of encoding and instead treat it, functionally, as encoded categorical data. To me, this sounds like the work of a
+clustering algorithm. The only issue is that the rest of our data doesn't need clustering analysis; much of it needs something more
+like some form of regression analysis. SVM offers a sort of categorical regression, but that still wouldn't necessarily be optimal for
+our numerical data. It's beginning to sound like the best option to me so far, so long as we are sticking to single algorithm usage.
+I will say, though, effective implementation of a 2 layered heirarchy in which an overarching geographic categorical algorithm could be
+fed data from individual states being numerically analyzed could provide interesting results. Of course, I have no idea how feasible this
+would be. At first thought, the primary difficulties would be 1) preprocessing the data so each iteration of the numerical algorithm is only
+fed data from one state of focus, and 2) finding a method of extracting the output from the numerical algorithms and combining it all to be
+fed into the overarching categorical algorithm. I may play with this idea at some point, but for now it remains just a thought.
+
+https://www.kdnuggets.com/2020/01/decision-tree-algorithm-explained.html
+
+This is an article giving a somewhat in-depth explanation of decision trees. I haven't fully absorbed it yet, but I'm seeing some potential
+usefulness depending on how we could actually implement it.

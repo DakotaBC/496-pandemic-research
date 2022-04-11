@@ -1,0 +1,12 @@
+Using demographic data, maybe I could make a model that could give a prediction
+as to the severity of infection for someone based on their demographics
+
+Trying to use the 2 different sets of data from 2019 VS 2020 to try and determine the impact of the pandemic on quantity of flight passengers
+
+Try to predict hospitalization 
+
+Use numerical values correlated to states to work around string-based IDs
+
+Use categorical features: State-state, predict hospitalization rate
+
+Algorithm: 

@@ -1,0 +1,11 @@
+﻿I began by trying to assemble a false data set in order to play around with SVM. After some time, however, I realized that the data sets I had been using earlier in the project would be much more useful for this; the struggles I had with data types is exactly what is being solved by using SVM. So, I picked one of these data sets and wrote a short script using SVM on select columns of it. In this case, I am simply using month and airport IDs as predictors for passenger count. Once again, this is simply to attempt to make sure I can use SVM correctly.
+
+
+Using the default svm algorithm under sklearn, I was given an error about data types and learned that I needed to use a “ravel” function on my output data. This seems to be a product of the Dataframe format vs. how SVM processes data. After applying this, however, I found that my script would execute for very long periods of time without ever finishing. However, my dataset is very large so I attempted to use a smaller amount of it, still not helping until it got so small that the script returned an error claiming the function does not converge.
+
+
+At this point, in an effort to be able to use a greater number of datapoints (giving a greater likelihood of convergence) I switched to the LinearSVM model. However, after troubleshooting with this model, I have thus far found the same issues as I did with the initial SVM model. I have 2 theories as to why this could be occurring;
+
+
+1. My data isn’t “normalized” in some way/the algorithm is interpreting it incorrectly. This would obviously lead to misinterpretation of the data, making it difficult for anything of value to be extracted. I could explore this possibility by printing out the data within the script itself, potentially showing any oddities in how the script is interpreting the data.
+2. The parameters I have chosen have little enough association that there simply is nothing meaningfully predictive to extract from this data. I could probably find some evidence for this by performing some simple data analysis myself.
