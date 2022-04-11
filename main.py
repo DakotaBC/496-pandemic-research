@@ -26,8 +26,8 @@ def screenData(dataPoint):
         return dataPoint
 
 def main():
-    Map = nx.Graph()
-    Map.edges.data("weight", default=0)
+    Map = nx.MultiGraph()
+    Map.edges.data(data=True)
     i = 1
     while i < 11:
         with open('./C19Graphs/'+str(i)+'.csv', 'r')as file:
@@ -39,7 +39,9 @@ def main():
                 if not row['dest_ID'] in Map:
                     Map.add_node(row['dest_ID'], name=row['dest_ID'], array=[])
                 """create an edge between the two nodes for each flight"""
-                Map.add_edge(row['origin_ID'], row['dest_ID'], weight=int(row['Prediction']), date=row['date'], route=row['ID'])
+                Map.add_edge(row['origin_ID'], row['dest_ID'], weight=int(
+                    row['Prediction']), date=row['date'], route=row['ID'])
+
         i += 1
 
     """Create Data Structure for Map Nodes to store daily changes, allow for changes in population"""
@@ -117,7 +119,7 @@ def main():
 
     with open("./output/covid_graph_data.csv", 'w', newline='') as newFile:
         doc = csv.writer(newFile)
-        header = ['name', 'week', 'population', 'deaths', 'confirmed', 'recovered', 'active', 'hospitalized', 'hospitalization rate']
+        header = ['name', 'week', 'population', 'flights', 'arrived', 'departed', 'deaths', 'confirmed', 'recovered', 'active', 'hospitalized', 'hospitalization rate']
         doc.writerow(header)
         for node in Map.nodes:
             i = 0
@@ -128,6 +130,9 @@ def main():
             active = 0
             hospitalized = 0
             hospitalization_rate = 0
+            flights = 0
+            arrived = 0
+            departed = 0
             if node[:2] == "US":
                 while i < 305:
                     date = Map.nodes[node]['array'][i][0]
@@ -139,16 +144,25 @@ def main():
                     active = Map.nodes[node]['array'][i][5]
                     hospitalized = Map.nodes[node]['array'][i][6]
                     hospitalization_rate = Map.nodes[node]['array'][i][7]
-                    for edge in Map.edges(Map.nodes[node], data=True):
-                        if date == edge.data("date"):
-                            if arriveOrLeave(node, edge.route):
-                                pop = pop - edge.weight
-                            else:
-                                pop = pop + edge.weight
+                    """This isn't working, we aren't getting our edge data!"""
+                    for otherNode in Map.nodes:
+                        aircraft = Map.number_of_edges(node, otherNode)
+                        for j in range(aircraft):
+                            if date == Map[node][otherNode][j]["date"]:
+                                flights = flights + 1
+                                print(flights)
+                                """
+                                if arriveOrLeave(node, edge.route):
+                                    pop = pop - edge.weight
+                                    departed = departed + edge.weight
+                                else:
+                                    pop = pop + edge.weight
+                                    arrived = arrived + edge.weight
+                                    """
                     pop = int(pop) - int(screenData(deaths))
                     if (j == 14 or i == 304):
                         """Data can produce NA, consult if the data should be structured in the form of NA = 0"""
-                        doc.writerow([str(node), str(week), str(pop), str(deaths), str(confirmed), str(recovered), str(active), str(hospitalized), str(float(screenData(hospitalization_rate)) / j)])
+                        doc.writerow([str(node), str(week), str(pop), str(flights), str(arrived), str(departed), str(deaths), str(confirmed), str(recovered), str(active), str(hospitalized), str(float(screenData(hospitalization_rate)) / j)])
                         j = -1
                         deaths = 0
                         confirmed = 0
@@ -156,6 +170,9 @@ def main():
                         active = 0
                         hospitalized = 0
                         hospitalization_rate = 0  
+                        flights = 0
+                        arrived = 0
+                        departed = 0
                     i += 1
                     j += 1
 
