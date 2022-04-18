@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from calendar import week
 from tokenize import String
 from unicodedata import name
 from click import confirm
@@ -25,7 +26,7 @@ def screenData(dataPoint):
     else:
         return dataPoint
 
-def main():
+def undirectedGraph():
     Map = nx.MultiGraph()
     Map.edges.data(data=True)
     i = 1
@@ -147,10 +148,10 @@ def main():
                     """This isn't working, we aren't getting our edge data!"""
                     for otherNode in Map.nodes:
                         aircraft = Map.number_of_edges(node, otherNode)
-                        for j in range(aircraft):
-                            if date == Map[node][otherNode][j]["date"]:
+                        k = 0
+                        for k in range(aircraft):
+                            if date == Map[node][otherNode][k]["date"]:
                                 flights = flights + 1
-                                print(flights)
                                 """
                                 if arriveOrLeave(node, edge.route):
                                     pop = pop - edge.weight
@@ -175,5 +176,118 @@ def main():
                         departed = 0
                     i += 1
                     j += 1
+
+def directedGraph():
+    G = nx.DiGraph()
+    G.edges.data(data=True)
+
+    i = 1
+    while i < 11:
+        with open('./C19Graphs/'+str(i)+'.csv', 'r')as file:
+            dict = csv.DictReader(file)
+            for row in dict:
+                """if find_node == false create node x2"""
+                if not row['origin_ID'] in G:
+                    G.add_node(row['origin_ID'],
+                                 name=row['origin_ID'], array=[])
+                if not row['dest_ID'] in G:
+                    G.add_node(row['dest_ID'], name=row['dest_ID'], array=[])
+                """create an edge between the two nodes if one doesn't exist"""
+                if G.has_edge(row['origin_ID'], row['dest_ID']):
+                    G[row['origin_ID']][row['dest_ID']]['data'].append([row['Prediction'], row['date']])
+                else:
+                    G.add_edge(row['origin_ID'], row['dest_ID'])
+                    G[row['origin_ID']][row['dest_ID']]['data'] = []
+                    G[row['origin_ID']][row['dest_ID']]['data'].append([row['Prediction'], row['date']])
+
+        i += 1
+    
+    i = 1
+    j = 0
+    """Update Nodes for new Di-Graph"""
+    while i < 6:
+        with open('./C19StateData/nodes'+str(i)+'.csv', 'r')as file:
+            dict = csv.DictReader(file)
+            newArray = [[0 for x in range(8)] for i in range(305)]
+            for row in dict:
+                """Input data into data structure to store daily data"""
+                """Fields: Source ID, date, pop, deaths, confirmed, recovered, active, people hospitalized, hospitalization rate"""
+                newArray[j][0] = row['date']
+                newArray[j][1] = row['pop']
+                newArray[j][2] = row['Deaths']
+                newArray[j][3] = row['Confirmed']
+                newArray[j][4] = row['Recovered']
+                newArray[j][5] = row['Active']
+                newArray[j][6] = row['People_Hospitalized']
+                newArray[j][7] = row['Hospitalization_Rate']
+                j += 1
+                if j == 305:
+                    j = 0
+                    curr = (row['country_code']+", "+row['sub_region_1'])
+                    if (curr == 'US, District of Columbia'):
+                        G.nodes['US, DC']['array'] = newArray
+                    else:
+                        """This is a issue, we don't have flight data for Delaware"""
+                        if (curr != 'US, DE'):
+                            G.nodes[curr]['array'] = newArray
+                        else:
+                            G.add_node('US, DE', name='US, DE',
+                                       array=newArray)
+                    newArray = [[0 for x in range(8)] for i in range(305)]
+        i += 1
+    
+    """Output Douglas Data for SVR algorithm in csv"""
+    with open("./output/covid_svr_data.csv", 'w', newline='') as newFile:
+        doc = csv.writer(newFile)
+        header = ['name', 'week', 'population', 'deaths', 'confirmed',
+                  'recovered', 'active', 'hospitalized', 'hospitalization rate']
+        for node in G.nodes:
+            header.append(str(node) + ' - HR')
+        doc.writerow(header)
+        for node in G.nodes:
+            i = 0
+            j = 0
+            deaths = 0
+            confirmed = 0
+            recovered = 0
+            active = 0
+            hospitalized = 0
+            hospitalization_rate = 0
+            week = 0
+            if node[:2] == "US":
+                while i < 305:
+                    if i == 0:
+                        pop = int(screenData(G.nodes[node]['array'][i][1]))
+                    if j == 0:
+                        """week = G.nodes[node]['array'][i][0]"""
+                        week = week + 1
+                    deaths += int(screenData(G.nodes[node]['array'][i][2]))
+                    confirmed += int(screenData(
+                        G.nodes[node]['array'][i][3]))
+                    recovered += int(screenData(
+                        G.nodes[node]['array'][i][4]))
+                    active += int(screenData(G.nodes[node]['array'][i][5]))
+                    hospitalized += int(screenData(
+                        G.nodes[node]['array'][i][6]))
+                    hospitalization_rate += float(
+                        screenData(G.nodes[node]['array'][i][7]))
+                    if (j == 14 or i == 304):
+                        doc.writerow([str(node), str(week), str(pop), str(deaths), str(confirmed), str(
+                            recovered), str(active), str(hospitalized), str(hospitalization_rate / j)])
+                        j = -1
+                        deaths = 0
+                        confirmed = 0
+                        recovered = 0
+                        active = 0
+                        hospitalized = 0
+                        hospitalization_rate = 0
+                    i += 1
+                    j += 1
+
+    
+
+
+def main():
+    directedGraph()
 
 main()
