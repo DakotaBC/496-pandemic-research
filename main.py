@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from calendar import week
+from datetime import date
 from tokenize import String
 from unicodedata import name
 from click import confirm
@@ -237,7 +238,7 @@ def directedGraph():
         i += 1
     
     """Output Douglas Data for SVR algorithm in csv"""
-    with open("./output/covid_svr_data.csv", 'w', newline='') as newFile:
+    """with open("./output/covid_svr_data.csv", 'w', newline='') as newFile:
         doc = csv.writer(newFile)
         header = ['name', 'week', 'population', 'deaths', 'confirmed',
                   'recovered', 'active', 'hospitalized', 'hospitalization rate']
@@ -259,7 +260,7 @@ def directedGraph():
                     if i == 0:
                         pop = int(screenData(G.nodes[node]['array'][i][1]))
                     if j == 0:
-                        """week = G.nodes[node]['array'][i][0]"""
+                        week = G.nodes[node]['array'][i][0]
                         week = week + 1
                     deaths += int(screenData(G.nodes[node]['array'][i][2]))
                     confirmed += int(screenData(
@@ -282,7 +283,63 @@ def directedGraph():
                         hospitalized = 0
                         hospitalization_rate = 0
                     i += 1
+                    j += 1"""
+
+    """"""
+    with open("./output/digraph_.csv", 'w', newline='') as newFile:
+        doc = csv.writer(newFile)
+        header = ['name', 'week', 'population', 'deaths', 'confirmed', 'recovered', 'active', 'flights_arrived', 'flights_departed', 'arrived', 'departed', 'hospitalized', 'hospitalization rate']
+        doc.writerow(header)
+        for node in G.nodes:
+            i = 0
+            j = 0
+            deaths = 0
+            confirmed = 0
+            recovered = 0
+            active = 0
+            flights_arrived = 0
+            flights_departed = 0
+            arrived = 0
+            departed = 0
+            hospitalized = 0
+            hospitalization_rate = 0
+            if node[:2] == "US":
+                while i < 305:
+                    if i == 0:
+                        pop = int(screenData(G.nodes[node]['array'][i][1]))
+                    if j == 0:
+                        week = G.nodes[node]['array'][i][0]
+                    deaths += int(screenData(G.nodes[node]['array'][i][2]))
+                    confirmed += int(screenData(G.nodes[node]['array'][i][3]))
+                    recovered += int(screenData(G.nodes[node]['array'][i][4]))
+                    active += int(screenData(G.nodes[node]['array'][i][5]))
+                    hospitalized += int(screenData(G.nodes[node]['array'][i][6]))
+                    hospitalization_rate += float(screenData(G.nodes[node]['array'][i][7]))
+                    for nodes in G.nodes:
+                        nodeData = G.get_edge_data(node, nodes, default=0)
+                        if nodeData != 0:
+                            for day in nodeData['data']:
+                                if day[1] == G.nodes[node]['array'][i][0]:
+                                    arrived = arrived + int(day[0])
+                                    flights_arrived = flights_arrived + 1
+                    if (j == 14 or i == 304):
+                        doc.writerow([str(node), str(week), str(pop), str(deaths), str(confirmed), str(recovered), str(active), str(flights_arrived), str(flights_departed), str(arrived), str(departed), str(hospitalized), str(hospitalization_rate / j)])
+                        j = -1
+                        deaths = 0
+                        confirmed = 0
+                        recovered = 0
+                        active = 0
+                        flights_arrived = 0
+                        flights_departed = 0
+                        arrived = 0
+                        departed = 0
+                        hospitalized = 0
+                        hospitalization_rate = 0    
+                    i += 1
                     j += 1
+
+    
+    
 
     
 
