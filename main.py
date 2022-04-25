@@ -243,7 +243,10 @@ def directedGraph():
         header = ['name', 'week', 'population', 'deaths', 'confirmed',
                   'recovered', 'active', 'hospitalized', 'hospitalization rate']
         for node in G.nodes:
-            header.append(str(node) + ' - HR')
+            header.append(str(node) + ' - deaths')
+            header.append(str(node) + ' - confirmed')
+            header.append(str(node) + ' - recovered')
+            header.append(str(node) + ' - hospitalized')
         doc.writerow(header)
         for node in G.nodes:
             i = 0
@@ -285,7 +288,6 @@ def directedGraph():
                     i += 1
                     j += 1"""
 
-    """"""
     with open("./output/digraph_.csv", 'w', newline='') as newFile:
         doc = csv.writer(newFile)
         header = ['name', 'week', 'population', 'deaths', 'confirmed', 'recovered', 'active', 'flights_arrived', 'flights_departed', 'arrived', 'departed', 'hospitalized', 'hospitalization rate']
@@ -315,14 +317,18 @@ def directedGraph():
                     active += int(screenData(G.nodes[node]['array'][i][5]))
                     hospitalized += int(screenData(G.nodes[node]['array'][i][6]))
                     hospitalization_rate += float(screenData(G.nodes[node]['array'][i][7]))
-                    for nodes in G.nodes:
-                        nodeData = G.get_edge_data(node, nodes, default=0)
-                        if nodeData != 0:
-                            for day in nodeData['data']:
-                                if day[1] == G.nodes[node]['array'][i][0]:
-                                    arrived = arrived + int(day[0])
-                                    flights_arrived = flights_arrived + 1
+                    for u, v, data in G.in_edges(node, data=True):
+                        for day in data['data']:
+                            if day[1] == G.nodes[node]['array'][i][0]:
+                                arrived = arrived + int(day[0])
+                                flights_arrived = flights_arrived + 1
+                    for u, v, data in G.out_edges(node, data=True):
+                        for day in data['data']:
+                            if day[1] == G.nodes[node]['array'][i][0]:
+                                departed = departed + int(day[0])
+                                flights_departed = flights_departed + 1
                     if (j == 14 or i == 304):
+                        print(node+" now printing week: "+str(week))
                         doc.writerow([str(node), str(week), str(pop), str(deaths), str(confirmed), str(recovered), str(active), str(flights_arrived), str(flights_departed), str(arrived), str(departed), str(hospitalized), str(hospitalization_rate / j)])
                         j = -1
                         deaths = 0
@@ -337,12 +343,6 @@ def directedGraph():
                         hospitalization_rate = 0    
                     i += 1
                     j += 1
-
-    
-    
-
-    
-
 
 def main():
     directedGraph()
