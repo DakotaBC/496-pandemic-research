@@ -27,6 +27,20 @@ def screenData(dataPoint):
     else:
         return dataPoint
 
+def generateVisual(G):
+    """draw graph"""
+    nx.draw_random(G, with_labels=True, font_weight='bold')
+    plt.show()
+
+def betweennessCent(G):
+    bc = nx.betweenness_centrality(G)
+    with open("./output/covid_graph_betweenness_centrality.csv", 'w', newline='') as newFile:
+        doc = csv.writer(newFile)
+        header = ['name', 'Betweenness Centrality']
+        doc.writerow(header)
+        for state in bc:
+            doc.writerow([state, bc[state]])
+
 def undirectedGraph():
     Map = nx.MultiGraph()
     Map.edges.data(data=True)
@@ -301,10 +315,11 @@ def directedGraph():
             active = 0
             flights_arrived = 0
             flights_departed = 0
-            arrived = 0
-            departed = 0
+            passengers_arrived = 0
+            passengers_departed = 0
             hospitalized = 0
             hospitalization_rate = 0
+
             if node[:2] == "US":
                 while i < 305:
                     if i == 0:
@@ -320,16 +335,16 @@ def directedGraph():
                     for u, v, data in G.in_edges(node, data=True):
                         for day in data['data']:
                             if day[1] == G.nodes[node]['array'][i][0]:
-                                arrived = arrived + int(day[0])
+                                passengers_arrived = passengers_arrived + int(day[0])
                                 flights_arrived = flights_arrived + 1
                     for u, v, data in G.out_edges(node, data=True):
                         for day in data['data']:
                             if day[1] == G.nodes[node]['array'][i][0]:
-                                departed = departed + int(day[0])
+                                passengers_departed = passengers_departed + int(day[0])
                                 flights_departed = flights_departed + 1
                     if (j == 14 or i == 304):
                         print(node+" now printing week: "+str(week))
-                        doc.writerow([str(node), str(week), str(pop), str(deaths), str(confirmed), str(recovered), str(active), str(flights_arrived), str(flights_departed), str(arrived), str(departed), str(hospitalized), str(hospitalization_rate / j)])
+                        doc.writerow([str(node), str(week), str(pop), str(deaths), str(confirmed), str(recovered), str(active), str(flights_arrived), str(flights_departed), str(passengers_arrived), str(passengers_departed), str(hospitalized), str(hospitalization_rate / j)])
                         j = -1
                         deaths = 0
                         confirmed = 0
@@ -337,8 +352,8 @@ def directedGraph():
                         active = 0
                         flights_arrived = 0
                         flights_departed = 0
-                        arrived = 0
-                        departed = 0
+                        passengers_arrived = 0
+                        passengers_departed = 0
                         hospitalized = 0
                         hospitalization_rate = 0    
                     i += 1
