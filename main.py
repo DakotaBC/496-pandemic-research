@@ -32,14 +32,22 @@ def generateVisual(G):
     nx.draw_random(G, with_labels=True, font_weight='bold')
     plt.show()
 
-def betweennessCent(G):
+def betweennessCent(G, filename):
     bc = nx.betweenness_centrality(G)
-    with open("./output/covid_graph_betweenness_centrality.csv", 'w', newline='') as newFile:
+    with open("./output/"+filename+".csv", 'w', newline='') as newFile:
         doc = csv.writer(newFile)
         header = ['name', 'Betweenness Centrality']
         doc.writerow(header)
         for state in bc:
             doc.writerow([state, bc[state]])
+
+def inDegreeOutDegree(G):
+    with open("./output/inDegreeOutDegree.csv", 'w', newline='') as newFile:
+        doc = csv.writer(newFile)
+        header = ['name', 'in_degree', 'out_degree']
+        doc.writerow(header)
+        for node in G:
+            doc.writerow([node, G.in_degree(node), G.out_degree(node)])
 
 def undirectedGraph():
     Map = nx.MultiGraph()
@@ -302,7 +310,9 @@ def directedGraph():
                     i += 1
                     j += 1"""
 
-    with open("./output/digraph_.csv", 'w', newline='') as newFile:
+    inDegreeOutDegree(G)
+
+    """with open("./output/digraph_.csv", 'w', newline='') as newFile:
         doc = csv.writer(newFile)
         header = ['name', 'week', 'population', 'deaths', 'confirmed', 'recovered', 'active', 'flights_arrived', 'flights_departed', 'arrived', 'departed', 'hospitalized', 'hospitalization rate']
         doc.writerow(header)
@@ -357,7 +367,7 @@ def directedGraph():
                         hospitalized = 0
                         hospitalization_rate = 0    
                     i += 1
-                    j += 1
+                    j += 1"""
 
 def main():
     directedGraph()
