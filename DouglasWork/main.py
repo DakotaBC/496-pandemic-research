@@ -1,4 +1,4 @@
-import pandas
+import pandas, keras
 import numpy
 from sklearn import linear_model, metrics, svm, preprocessing
 from sklearn.model_selection import train_test_split
@@ -6,71 +6,57 @@ from sklearn.model_selection import train_test_split
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
 
-file = open("/home/douglas/Desktop/CSCI496/GitProject/cs496-research-project/Douglas's Work/Datasets/covid_node_data.csv")
+file = open("/home/douglas/Desktop/CSCI496/github/496-pandemic-research/DouglasWork/Datasets/WA_svr_data_v2.csv")
 #file2 = open("/home/douglas/Desktop/CSCI496/GitProject/cs496-research-project/Douglas's Work/Datasets/T_100_2019.csv")
 
-CovidData = pandas.read_csv(file)
-#reCovidData = pandas.read_csv(file2)
+#CovidData = pandas.read_csv(file)
 
-#print(PreCovidData)
-#print(CovidData)
+data = numpy.genfromtxt(file, delimiter=',',usecols=numpy.arange(start=1, stop=208))
+#data = numpy.delete(data, 1)
+#print(data)
+#data = numpy.delete(data, 0)
 
-#framelabel = pandas.DataFrame(skframe.loc[:,"PASSENGERS"])
+#for a in data:
+    #print(a)
 
-#Xtrain, Xtest, Ytrain, Ytest = train_test_split(CovidData.loc[:, "population"], CovidData.loc[:,"hospitalization rate"], test_size=.33, random_state=50)
+dataset = keras.preprocessing.timeseries.timeseries_dataset_from_array(data, None, 21)
 
-#Xtrain = PreCovidData.loc[:, ["MONTH", "ORIGIN_AIRPORT_ID", "DEST_AIRPORT_ID"]]
-#Xtest = PreCovidData.loc[:, ["PASSENGERS"]]
+print(dataset)
 
-#Ytrain = CovidData.loc[:, ["MONTH", "ORIGIN_AIRPORT_ID", "DEST_AIRPORT_ID"]]
-#Ytest = CovidData.loc[:, ["PASSENGERS"]]
+features = []
+labels = []
 
-#Xtrain = CovidData.loc[:, "population"]
-#Ytrain = CovidData.loc[:, "hospitalization rate"]
+training_length = 15
 
-#encoder = preprocessing.LabelEncoder()
+for inst in dataset:
 
-#print(Xtrain)
+    #print(inst)
+    #print()
+    for i in range(training_length, len(inst)):
 
-#encoder.fit_transform(Xtrain)
-#encoder.fit_transform(Ytrain)
+        extract = inst[i - training_length:i + 1]
 
-#Xtrain_scaled = preprocessing.StandardScaler().fit(Xtrain.values.reshape(-1,1)).transform(Xtrain.values.reshape(-1,1))
+        features.append(extract[:-1])
+        labels.append(extract[-1])
 
-#Xtrain_bound = preprocessing.MinMaxScaler().fit_transform(Xtrain_scaled)
+features = numpy.array(features)
 
-#Ytrain_scaled = preprocessing.StandardScaler().fit(Ytrain.values.reshape(-1,1)).transform(Ytrain.values.reshape(-1,1))
+#print(features)
 
-#Ytrain_bound = preprocessing.MinMaxScaler().fit_transform(Ytrain_scaled)
+#print(CovidData.iloc[:,0:8].values)
+#print(CovidData.iloc[:,8].values)
 
-#NewTest = Ytrain.values.reshape((-1,1))
-#print("Testing")
-#model=svm.SVR(kernel='rbf')
-#model.fit((numpy.ravel(Xtrain_bound)).reshape(-1,1),numpy.ravel(Ytrain_bound))
+#scaler_X = preprocessing.StandardScaler()
+#scaler_Y = preprocessing.StandardScaler()
 
-#model.predict(Xtest)
+#Inputs = scaler_X.fit_transform(CovidData.iloc[:,8:207].values)
+#Predictor = scaler_Y.fit_transform((CovidData.iloc[:,2].values).reshape(-1,1))
+#print("test")
+#alg = svm.SVR(kernel = 'rbf')
+#alg.fit(Inputs, Predictor.ravel())
 
-#model = linear_model.LinearRegression()
-#model.fit(Xtrain, Ytrain)
+#predicted = alg.predict((CovidData.iloc[:,8:207]))
+#predicted = scaler_Y.inverse_transform(predicted.reshape(1,-1))
+#print(predicted)
 
-#Ypredicted = model.predict(Xtest)
 
-#print("RMSE: " + str(metrics.mean_squared_error(Ytest, Ypredicted, squared=False)))
-
-#print(CovidData["PASSENGERS"].mean())
-
-print(CovidData.iloc[:,0:8].values)
-print(CovidData.iloc[:,8].values)
-
-scaler_X = preprocessing.StandardScaler()
-scaler_Y = preprocessing.StandardScaler()
-
-Inputs = scaler_X.fit_transform(CovidData.iloc[:,2:8].values)
-Predictor = scaler_Y.fit_transform((CovidData.iloc[:,8].values).reshape(-1,1))
-print("test")
-alg = svm.SVR(kernel = 'rbf')
-alg.fit(Inputs, Predictor.ravel())
-
-predicted = alg.predict((CovidData.iloc[:,2:8]))
-predicted = scaler_Y.inverse_transform(predicted.reshape(1,-1))
-print(predicted)
