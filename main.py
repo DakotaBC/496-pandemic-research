@@ -8,6 +8,7 @@ from click import confirm
 import networkx as nx
 import matplotlib.pyplot as plt
 import csv
+from datetime import datetime, timedelta
 
 """main.py A simple graphical creation and visualization of 2020 U.S. air traffic flow. Each node is a state or territory. Edges are flights. 
 Data: https://github.com/fshelobolin/C19DynamicGraph/"""
@@ -369,7 +370,70 @@ def directedGraph():
                     i += 1
                     j += 1"""
 
+
+"""Untested - Long Runtime!"""
+def dailyDiGraph():
+    G = {}
+    day = datetime(2020, 1, 1)
+    for x in range (0, 304):
+        G[x]=nx.DiGraph()
+        i = 1
+        while i < 11:
+            with open('./C19Graphs/'+str(i)+'.csv', 'r')as file:
+                dict = csv.DictReader(file)
+                for row in dict:
+                    readDate = datetime.strptime(row['date'], "%Y-%m-%d")
+                    if readDate == day:
+                        """if find_node == false create node x2"""
+                        if not row['origin_ID'] in G:
+                            G[x].add_node(row['origin_ID'],
+                                    name=row['origin_ID'], array=[])
+                        if not row['dest_ID'] in G:
+                            G[x].add_node(row['dest_ID'], name=row['dest_ID'], array=[])
+                        
+                        """create an edge between the two nodes if one doesn't exist"""
+                        if G[x].has_edge(row['origin_ID'], row['dest_ID']):
+                            G[x][row['origin_ID']][row['dest_ID']]['data'].append([row['Prediction'], row['date']])
+                        else:
+                            G[x].add_edge(row['origin_ID'], row['dest_ID'])
+                            G[x][row['origin_ID']][row['dest_ID']]['data'] = []
+                            G[x][row['origin_ID']][row['dest_ID']]['data'].append([row['Prediction'], row['date']])
+            i += 1
+        i = 0
+        """Update Nodes for new Di-Graph"""
+        while i < 6:
+            with open('./C19StateData/nodes'+str(i)+'.csv', 'r')as file:
+                dict = csv.DictReader(file)
+                newArray = [0 for x in range(8)]
+                for row in dict:
+                    readDate = datetime.strptime(row['date'], "%Y-%m-%d")
+                    if readDate == day:
+                        """Input data into data structure to store daily data"""
+                        """Fields: Source ID, date, pop, deaths, confirmed, recovered, active, people hospitalized, hospitalization rate"""
+                        newArray[0] = row['date']
+                        newArray[1] = row['pop']
+                        newArray[2] = row['Deaths']
+                        newArray[3] = row['Confirmed']
+                        newArray[4] = row['Recovered']
+                        newArray[5] = row['Active']
+                        newArray[6] = row['People_Hospitalized']
+                        newArray[7] = row['Hospitalization_Rate']
+                        curr = (row['country_code']+", "+row['sub_region_1'])
+                        if (curr == 'US, District of Columbia'):
+                            G[x].nodes['US, DC']['array'] = newArray
+                        else:
+                            """This is a issue, we don't have flight data for Delaware"""
+                            if (curr != 'US, DE'):
+                                G[x].nodes[curr]['array'] = newArray
+                            else:
+                                G[x].add_node('US, DE', name='US, DE', array=newArray)
+                        newArray = [0 for x in range(8)]
+            i += 1
+        day += timedelta(days=1)
+    print("Got Here!")
+    
+
 def main():
-    directedGraph()
+    dailyDiGraph()
 
 main()
