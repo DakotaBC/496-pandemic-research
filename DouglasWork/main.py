@@ -1,7 +1,9 @@
-import pandas, keras
+import pandas
 import numpy
+import tensorflow.keras
 from sklearn import linear_model, metrics, svm, preprocessing
 from sklearn.model_selection import train_test_split
+from tensorflow.keras import optimizers
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
@@ -19,27 +21,35 @@ data = numpy.genfromtxt(file, delimiter=',',usecols=numpy.arange(start=1, stop=2
 #for a in data:
     #print(a)
 
-dataset = keras.preprocessing.timeseries.timeseries_dataset_from_array(data, None, 21)
+#inp = data[:-20]
+#print(inp)
+#targets = data[20:]
+#print()
+#print(targets)
 
-print(dataset)
+#dataset = keras.preprocessing.timeseries.timeseries_dataset_from_array(inp, targets, 21)
 
-features = []
-labels = []
+#print(dataset)
 
-training_length = 15
+model = tensorflow.keras.Sequential([tensorflow.keras.layers.Dense(208,activation='relu'),
+                          tensorflow.keras.layers.Dense(208,activation='relu'),
+                          #keras.layers.Dense(208,activation='relu')])
+                          tensorflow.keras.layers.Dense(1)])
 
-for inst in dataset:
+predictions = model.predict(data[1:5])
+print(predictions)
 
-    #print(inst)
-    #print()
-    for i in range(training_length, len(inst)):
+model.compile(loss=tensorflow.keras.losses.BinaryCrossentropy(from_logits=True),
+              optimizer=tensorflow.keras.optimizers.Adam(1e-4),
+              metrics=['accuracy'])
 
-        extract = inst[i - training_length:i + 1]
+train = numpy.asarray(data[1:10])
+test = numpy.asarray(data[10:20])
 
-        features.append(extract[:-1])
-        labels.append(extract[-1])
+history = model.fit(numpy.all(train), epochs=10,
+                    validation_data=numpy.all(test),
+                    validation_steps=10)
 
-features = numpy.array(features)
 
 #print(features)
 
@@ -58,5 +68,7 @@ features = numpy.array(features)
 #predicted = alg.predict((CovidData.iloc[:,8:207]))
 #predicted = scaler_Y.inverse_transform(predicted.reshape(1,-1))
 #print(predicted)
+
+print("hi!")
 
 
