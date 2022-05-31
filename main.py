@@ -9,6 +9,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import csv
 from datetime import datetime, timedelta
+import numpy as np
 
 """main.py A simple graphical creation and visualization of 2020 U.S. air traffic flow. Each node is a state or territory. Edges are flights. 
 Data: https://github.com/fshelobolin/C19DynamicGraph/"""
@@ -30,7 +31,7 @@ def screenData(dataPoint):
 
 def generateVisual(G):
     """draw graph"""
-    nx.draw_random(G, with_labels=True, font_weight='bold')
+    nx.draw_circular(G, with_labels=True, font_weight='bold')
     plt.show()
 
 def betweennessCent(G, filename):
@@ -41,6 +42,44 @@ def betweennessCent(G, filename):
         doc.writerow(header)
         for state in bc:
             doc.writerow([state, bc[state]])
+
+
+def betweennessCentWeight(G, filename):
+    for node in G.nodes:
+        for u, v, data in G.in_edges(node, data=True):
+            for day in data['data']:
+                if (day[0] != "0"):
+                    day[0] = str(1 / float(day[0]))
+        for u, v, data in G.out_edges(node, data=True):
+            for day in data['data']:
+                if (day[0] != "0"):
+                    day[0] = str(1 / float(day[0]))
+    bc = nx.betweenness_centrality(G)
+    with open("./output/"+filename+".csv", 'w', newline='') as newFile:
+        doc = csv.writer(newFile)
+        header = ['name', 'Betweenness Centrality']
+        doc.writerow(header)
+        for state in bc:
+            doc.writerow([state, bc[state]])
+
+def normalizedBetweennessCent(G, filename):
+    bc = nx.betweenness_centrality(G)
+    norm = []
+    for state in bc:
+        norm = np.append(norm, bc[state])
+    x = np.linalg.norm(norm)
+    output = x / norm
+    print(output)
+    # data_norm = []
+    # for x in norm:
+    #     data_norm = np.append(data_norm, ((x - x.min())/x.max() - x.min()))
+    # print(data_norm)
+    # with open("./output/"+filename+".csv", 'w', newline='') as newFile:
+    #     doc = csv.writer(newFile)
+    #     header = ['name', 'Betweenness Centrality']
+    #     doc.writerow(header)
+    #     for state in data_norm:
+    #         doc.writerow([state, bc[state]])
 
 def inDegreeOutDegree(G):
     with open("./output/inDegreeOutDegree.csv", 'w', newline='') as newFile:
@@ -102,6 +141,8 @@ def undirectedGraph():
                     newArray = [[0 for x in range(8)] for i in range(305)]                
         i += 1
 
+    """generateVisual(Map)"""
+    
     """Node data only: Biweekly"""
     with open("./output/covid_node_data.csv", 'w', newline='') as newFile:
         doc = csv.writer(newFile)
@@ -311,7 +352,7 @@ def directedGraph():
                     i += 1
                     j += 1"""
 
-    inDegreeOutDegree(G)
+    betweennessCentWeight(G, "covid_graph_betweenness_cent_weight")
 
     """with open("./output/digraph_.csv", 'w', newline='') as newFile:
         doc = csv.writer(newFile)
@@ -434,6 +475,6 @@ def dailyDiGraph():
     
 
 def main():
-    dailyDiGraph()
+    directedGraph()
 
 main()
