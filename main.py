@@ -46,15 +46,16 @@ def betweennessCent(G, filename):
 
 def betweennessCentWeight(G, filename):
     for node in G.nodes:
-        for u, v, data in G.in_edges(node, data=True):
+        passengers = 0
+        for u, v, data in G.edges(node, data=True):
             for day in data['data']:
-                if (day[0] != "0"):
-                    day[0] = str(1 / float(day[0]))
-        for u, v, data in G.out_edges(node, data=True):
-            for day in data['data']:
-                if (day[0] != "0"):
-                    day[0] = str(1 / float(day[0]))
-    bc = nx.betweenness_centrality(G)
+                passengers = passengers + int(day[0])
+            if(passengers):
+                data['data'] = 1 / float(passengers)
+            else:
+                data['data'] = 0
+            passengers = 0
+    bc = nx.betweenness_centrality(G, weight='data')
     with open("./output/"+filename+".csv", 'w', newline='') as newFile:
         doc = csv.writer(newFile)
         header = ['name', 'Betweenness Centrality']
