@@ -23,17 +23,29 @@ model = tensorflow.keras.Sequential([tensorflow.keras.layers.Dense(208,activatio
                           tensorflow.keras.layers.Dense(1)])
 
 predictions = model.predict(data[1:5])
-print(predictions)
+#print(predictions)
 
-model.compile(loss=tensorflow.keras.losses.BinaryCrossentropy(from_logits=True),
+model.compile(loss=tensorflow.keras.losses.MeanSquaredError(),
               optimizer=tensorflow.keras.optimizers.Adam(1e-4),
-              metrics=['accuracy'])
+              metrics=['root_mean_squared_error'])
 
-train = numpy.asarray(data[1:10])
-test = numpy.asarray(data[10:20])
+train = tensorflow.convert_to_tensor(data[1:10])
+test = tensorflow.convert_to_tensor(data[10:19])
 
-history = model.fit(train, epochs=10,
-                    validation_data=test,
+#print(tensorflow.shape(train))
+tensorflow.reshape(train, [9,-1,207])
+new_train = tensorflow.tuple([train[:-1][:],numpy.transpose(train)[-1][0:8]])
+print(new_train)
+new_test = tensorflow.tuple([test[:-1][:],numpy.transpose(test)[-1][0:8]])
+
+new_train = (tensorflow.convert_to_tensor(train)).batch(8).prefetch(tensorflow.data.AUTOTUNE)
+
+new_test = (tensorflow.convert_to_tensor(test)).batch(8).prefetch(tensorflow.data.AUTOUNE)
+
+#print(train)
+
+history = model.fit(new_train, epochs=10,
+                    validation_data=new_test,
                     validation_steps=10)
 
 
